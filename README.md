@@ -56,7 +56,26 @@ npm run tauri dev
 npm run tauri build
 ```
 
-Installers are written under `src-tauri/target/release/bundle/`.
+Installers are written under `src-tauri/target/release/bundle/` for **the OS you build on** (e.g. `.deb` / AppImage on Linux). A Windows `.exe` must be built on Windows (or via CI).
+
+### GitHub Release (Windows + Linux)
+
+This repo includes [`.github/workflows/release.yml`](.github/workflows/release.yml), which builds:
+
+| Platform | Typical artifacts |
+|----------|-------------------|
+| Windows | NSIS `.exe`, `.msi` |
+| Linux | `.deb`, `.AppImage` |
+
+Publish a release draft by tagging a version that matches `src-tauri/tauri.conf.json` (currently `0.1.0`):
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Or run **Actions → Release → Run workflow**.  
+In the repo: **Settings → Actions → General → Workflow permissions → Read and write permissions**.
 
 ## Sample data
 

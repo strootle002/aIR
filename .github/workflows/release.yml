@@ -1,0 +1,81 @@
+# Build Windows (.exe / .msi) and Linux (.deb / AppImage) installers
+# and attach them to a GitHub Release.
+#
+# Trigger:
+#   - Push a version tag:  git tag v0.1.0 && git push origin v0.1.0
+#   - Or run manually:     Actions → Release → Run workflow
+#
+# First time: Repo Settings → Actions → General → Workflow permissions
+# → "Read and write permissions" (needed so the action can create a release).
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  publish-tauri:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-22.04
+            args: ""
+          - platform: windows-latest
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            xdg-utils
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build and upload release assets
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: "aIR v__VERSION__"
+          releaseBody: |
+            Installers for **aIR: Annotated Incident Response and Data Analysis**.
+
+            - **Windows:** `.exe` (NSIS installer) and/or `.msi`
+            - **Linux:** `.deb` (Debian/Ubuntu) and `.AppImage` (portable)
+
+            Builds are unsigned. Windows SmartScreen may warn on first run.
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
