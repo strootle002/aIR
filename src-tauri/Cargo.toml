@@ -2,7 +2,7 @@
 name = "artifactgrid"
 version = "0.1.0"
 description = "ArtifactGrid — A Hyper Timeline Tool for DFIR"
-authors = ["ArtifactGrid Contributors"]
+authors = ["Elijah Stroot"]
 edition = "2021"
 
 [lib]
