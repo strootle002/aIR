@@ -213,4 +213,4 @@ Source never opened for write. Never locked by aIR. On-disk folder name `artifac
 
 ## License
 
-[MIT](LICENSE). Copyright (c) 2026 ArtifactGrid Contributors
+[MIT](LICENSE). Copyright (c) 2026 Elijah Stroot
