@@ -1,36 +1,47 @@
 # aIR: Annotated Incident Response and Data Analysis
 
-Open-source, cross-platform DFIR triage toolkit built with **Tauri 2 + React + TypeScript** for Windows, macOS, and Linux.
+Cross-platform DFIR triage and data exploration toolkit built with **Tauri 2 + React + TypeScript** for Windows, macOS, and Linux.
+
+Import tabular logs, filter and annotate them in a fast spreadsheet, then explore with timeline charts and mindmaps — without modifying the original evidence files.
 
 ## Product names
 
 | Name | Role |
 |------|------|
-| **aIR: Annotated Incident Response and Data Analysis** | Application |
-| **aGrid: Artifact Grid** | Timeline spreadsheet / CSV viewer |
-| **aChart: Asset Logs FlowChart** | Process / asset logs swimlane flowchart |
-| **aMind** | Pivot mindmap explorer (column levels → tree) |
+| **aIR** | Application (*Annotated Incident Response and Data Analysis*) |
+| **aGrid** | Artifact Grid — virtualized spreadsheet / timeline viewer |
+| **aChart** | Asset Logs FlowChart — process / asset swimlane timeline |
+| **aMind** | Pivot mindmap explorer (ordered columns → tree) |
 
 ## Features
 
-- **Safe import** — selecting a CSV / TSV / TXT / JSON / NDJSON copies it into an app workspace; the original file is never opened for write and is not locked by aIR
-- **aGrid** — virtualized spreadsheet with **Line → Tag → Tags → data** column order
-- **Per-column filters**, **global search**, and **Filter Editor** (AND / OR / NOT)
-- **Conditional formatting** rules (cell or entire row); manual highlights always win
-- **Shift + scroll** for horizontal panning; **word wrap**; **Alt + drag** resize-all
-- **Group by** column headers (expand/collapse all, sort by count)
-- **Export** visible or **highlighted** rows as CSV or JSON
-- **Session persistence** (`.ag_sess` sidecar)
-- **Timestamp histogram** (Graph → Graph Timeline) with resizable height
-- **aChart: Asset Logs FlowChart** — swimlane timeline with process lifelines, parent→child spawn links, event glyphs on a time X-axis, macro scrubber + event inspector. Lifelines end on `process_terminate` / `process_exit` when present in the event type column.
-- **aMind** — pivot mindmap from ordered columns over currently filtered rows
-- **Settings** — light/dark mode and accent themes
+### aGrid
+- Safe import of **CSV / TSV / TXT / JSON / NDJSON** (working copy only; originals stay untouched)
+- Virtualized grid with **Line → Tag → Tags → data** column order
+- Per-column filters (contains / include / exclude), global search, and **Filter Editor** (AND / OR / NOT)
+- Sort by column (timestamp-aware when applicable)
+- Optional **display timezone** for timestamp columns (display-only; CSV values unchanged)
+- Conditional formatting; manual row/column/cell highlights and tags
+- Group-by column headers (expand/collapse, sort by count)
+- Column show/hide, reorder, resize, word wrap
+- Export **visible** or **highlighted** rows as CSV or JSON
+- Session persistence via `.ag_sess` sidecars
+
+### Graphs
+- **Timeline histogram** — brush a time range to filter the grid (**Graph → Graph Timeline…**)
+- **aChart** — process lifelines, parent→child spawn links, event glyphs, macro scrubber, and inspector (**Graph → Convert to aChart…**)
+- **aMind** — map ordered columns into a mindmap over the *currently filtered* rows; expand/collapse by level or branch (**Graph → Convert to aMind…**)
+- Graph **Export…** — current view or whole graph as **PNG** or **PDF** (aChart full-timeline PDF can be multi-page)
+
+### Other
+- Light/dark appearance and accent themes (**Settings**)
+- Jump from graph nodes/events back to the matching aGrid row (with highlight)
 
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 20+
 - [Rust](https://rustup.rs/) (stable)
-- Platform deps for Tauri: see [Tauri prerequisites](https://tauri.app/start/prerequisites/)
+- Platform packages for Tauri: [Tauri prerequisites](https://tauri.app/start/prerequisites/)
 
 ## Develop
 
@@ -45,20 +56,28 @@ npm run tauri dev
 npm run tauri build
 ```
 
+Installers are written under `src-tauri/target/release/bundle/`.
+
 ## Sample data
 
-Open [`samples/demo_timeline.csv`](samples/demo_timeline.csv) for a small process/network timeline. Use **Graph → Convert to aChart: Asset Logs FlowChart…** — columns auto-suggest for `process` / `parent.process` / `event_type` / `path` / `destination_ip`.
+Open [`samples/demo_boot_session.csv`](samples/demo_boot_session.csv) — a synthetic Sysmon-style boot / login session on host `DEMO-PC01`.
+
+Suggested exploration:
+
+1. **Graph → Graph Timeline…** to browse density over time  
+2. **Graph → Convert to aChart: Asset Logs FlowChart…** — mapping auto-suggests process / parent / event action columns  
+3. **Graph → Convert to aMind…** — e.g. levels `event.category` → `process.name` → `event.action`
 
 ## Import safety
 
-On open, aIR copies the selected file to:
+On open, aIR copies the selected file into an app workspace:
 
 ```text
-<app-data>/artifactgrid/imports/<uuid>/<filename>.csv
+<data-dir>/artifactgrid/imports/<uuid>/<filename>
 ```
 
-(The on-disk workspace folder name is unchanged for compatibility.)
+The source file is never opened for write and is not locked by aIR. (The on-disk folder name `artifactgrid` is kept for compatibility.)
 
 ## License
 
-See repository license file.
+[MIT](LICENSE) — Copyright (c) 2026 ArtifactGrid Contributors
